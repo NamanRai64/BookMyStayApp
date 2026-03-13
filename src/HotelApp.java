@@ -20,5 +20,4 @@ public class HotelApp {
         System.out.println(gold + border + reset);
         System.out.println("\n[ Welcome to Book My Stay | Version 1.0.4 | SRM District ]");
     }
-}//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+}
