@@ -56,6 +56,13 @@ public class RoomInventory {
     }
 
     /**
+     * Requirement: Retrieve all registered room types for search.
+     */
+    public java.util.Set<String> getAllRoomTypes() {
+        return inventory.keySet();
+    }
+
+    /**
      * Requirement: Display inventory state.
      */
     public void displayInventory() {
