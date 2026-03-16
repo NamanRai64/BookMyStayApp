@@ -1,6 +1,11 @@
 package model;
 
+/**
+ * Key Concept: Abstract Class - Provides a template for specific room types.
+ * Helps in enforcing a consistent structure for all rooms.
+ */
 public abstract class Room {
+
     protected String roomType;
     protected int numberOfBeds;
     protected double size;
