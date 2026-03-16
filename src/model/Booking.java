@@ -1,7 +1,12 @@
+package model;
+
 import java.util.Date;
 
+/**
+ * Represent a booking transaction.
+ * Fixed: Added package declaration and ensured compatibility with Room class.
+ */
 public class Booking {
-
     private String customerName;
     private Room room;
     private Date checkIn;
@@ -12,15 +17,13 @@ public class Booking {
         this.room = room;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
-        room.setAvailable(false);
     }
 
     public void printBookingDetails() {
-        System.out.println("\n--- BOOKING CONFIRMED ---");
-        System.out.println("Customer: " + customerName);
-        System.out.println("Room Type: " + room.getClass().getSimpleName());
-        System.out.println("Check-In: " + checkIn);
-        System.out.println("Check-Out: " + checkOut);
-        System.out.println("Price/Night: " + room.getPricePerNight());
+        System.out.println("Booking for: " + customerName);
+        System.out.println("Room Type:   " + room.getRoomType());
+        System.out.println("Check-in:    " + checkIn);
+        System.out.println("Check-out:   " + checkOut);
+        System.out.println("Price/Night: $" + room.getPrice());
     }
 }
