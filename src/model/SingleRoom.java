@@ -1,16 +1,16 @@
+package model;
+
 public class SingleRoom extends Room {
-
-    static int available = 0;
-
-    public SingleRoom(int beds, int area, double price) {
-        super(beds, area, price);
-        available++;
+    public SingleRoom() {
+        super("Single Room", 1, 250.0, 100.0);
     }
 
     @Override
     public void displayRoomDetails() {
-        System.out.println("=== Single Room ===");
-        super.displayRoomDetails();
-        System.out.println("Available: " + available + "\n");
+        System.out.println("Room Type: " + roomType);
+        System.out.println("Beds:      " + numberOfBeds);
+        System.out.println("Size:      " + size + " sq. ft.");
+        System.out.println("Price:     $" + price);
+        System.out.println("---------------------------");
     }
 }
