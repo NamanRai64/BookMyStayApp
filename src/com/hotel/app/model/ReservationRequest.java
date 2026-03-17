@@ -1,10 +1,5 @@
-package model;
+package com.hotel.app.model;
 
-/**
- * Use Case 5: Booking Request (First-Come-First-Served)
- * Represents a guest's intent to book a room.
- * This is different from a confirmed Booking as it hasn't been allocated yet.
- */
 public class ReservationRequest {
     private String guestName;
     private String roomType;
