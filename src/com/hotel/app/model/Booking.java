@@ -1,11 +1,7 @@
-package model;
+package com.hotel.app.model;
 
 import java.util.Date;
 
-/**
- * Represent a booking transaction.
- * Fixed: Added package declaration and ensured compatibility with Room class.
- */
 public class Booking {
     private String customerName;
     private Room room;
