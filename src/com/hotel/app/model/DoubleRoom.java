@@ -1,4 +1,4 @@
-package model;
+package com.hotel.app.model;
 
 public class DoubleRoom extends Room {
     public DoubleRoom() {

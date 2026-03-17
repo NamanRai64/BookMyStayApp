@@ -1,8 +1,8 @@
-package model;
+package com.hotel.app.model;
 
-public class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super("Suite Room", 3, 750.0, 350.0);
+public class SingleRoom extends Room {
+    public SingleRoom() {
+        super("Single Room", 1, 250.0, 100.0);
     }
 
     @Override
