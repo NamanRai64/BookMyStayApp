@@ -1,5 +1,6 @@
 package com.hotel.app;
 
+import com.hotel.app.exception.HotelAppException;
 import com.hotel.app.model.*;
 import com.hotel.app.service.*;
 import java.util.HashMap;
@@ -45,6 +46,13 @@ public class HotelApp {
         BookingQueueService bookingQueue = new BookingQueueService();
         AllocationService allocationService = new AllocationService(inventory);
         AddOnManager addOnManager = new AddOnManager();
+        BookingHistory bookingHistory = new BookingHistory(); // UC 8
+        BookingReportService reportService = new BookingReportService(); // UC 8
+        BookingValidator validator = new BookingValidator(inventory); // UC 9
+        CancellationService cancellationService = new CancellationService(bookingHistory, inventory); // UC 10
+
+
+
 
         // --- Use Case 3 & 4: Room Discovery & Initialization ---
         System.out.println(cyan + "\n>> [PHASE 1] Initializing Room Inventory & Catalog..." + reset);
@@ -70,10 +78,13 @@ public class HotelApp {
             System.out.println("Processing Guest: " + nextReq.getGuestName());
             System.out.println("Requested Type:  " + nextReq.getRoomType());
 
-            // Logical Unit: Check availability -> Decrement -> Assign ID -> Record
-            String assignedRoomId = allocationService.allocateRoom(nextReq);
+            // --- Use Case 9: Input & State Validation (Fail-Fast) ---
+            try {
+                validator.validateRequest(nextReq);
+                
+                // Logical Unit: Check availability (internal guard) -> Decrement -> Assign ID -> Record
+                String assignedRoomId = allocationService.allocateRoom(nextReq);
 
-            if (assignedRoomId != null) {
                 System.out.println(cyan + "RESULT: SUCCESS. Confirmation ID generated." + reset);
                 System.out.println("Assigned Room:   " + gold + assignedRoomId + reset);
                 
@@ -93,8 +104,24 @@ public class HotelApp {
 
                 // Cost Aggregation & Service Display
                 addOnManager.displayServicesForRoom(assignedRoomId);
-            } else {
-                System.err.println("RESULT: FAILED. No '" + nextReq.getRoomType() + "' rooms available.");
+
+                // --- Use Case 8: Booking History Recording ---
+                Room roomInfo = catalog.get(nextReq.getRoomType());
+                Reservation res = new Reservation(nextReq.getGuestName(), nextReq.getRoomType(), assignedRoomId, roomInfo.getPrice());
+                
+                // Mirror add-ons from UC 7 to History Record (Simplification for simulation)
+                if (nextReq.getGuestName().equals("Alice")) {
+                    res.addAddOn(new AddOnService("Late Checkout", 25.0));
+                    res.addAddOn(new AddOnService("Breakfast Buffet", 15.0));
+                } else if (nextReq.getGuestName().equals("Bob")) {
+                    res.addAddOn(new AddOnService("Mini Bar", 30.0));
+                } else if (nextReq.getGuestName().equals("David")) {
+                    res.addAddOn(new AddOnService("Spa Access", 60.0));
+                }
+
+                bookingHistory.addRecord(res);
+            } catch (HotelAppException e) {
+                System.err.println("RESULT: FAILED. " + e.getMessage());
             }
         }
 
@@ -103,8 +130,33 @@ public class HotelApp {
         allocationService.displayAllocations();
         inventory.displayInventory();
 
+        System.out.println(gold + "\n>> [PHASE 5] Admin Historical Reports & Analytics:" + reset);
+        reportService.generateSummaryReport(bookingHistory.getHistoricalRecords());
+
+        // --- Use Case 10: Booking Cancellation & State Rollback ---
+        System.out.println(gold + "\n>> [PHASE 6] Booking Cancellation & System Rollback:" + reset);
+        try {
+            // Simulating a guest (Alice) cancelling her booking (S101)
+            System.out.println(">> Guest (Alice) initiating cancellation [REQ TYPE: Rollback]...");
+            cancellationService.cancelBooking("S101");
+            
+            // Simulating an invalid cancellation attempt
+            System.out.println("\n>> Guest attempting an invalid cancellation (Unknown ID)...");
+            cancellationService.cancelBooking("X999");
+        } catch (HotelAppException e) {
+            System.err.println("CATCH: " + e.getMessage());
+        }
+
+        // --- Final System State Audit ---
+        System.out.println(gold + "\n>> [FINAL] System Audit & Rollback Verification:" + reset);
+        allocationService.displayAllocations();
+        inventory.displayInventory();
+        cancellationService.displayRollbackState();
+        
         System.out.println(gold + border + reset);
-        System.out.println(cyan + "Module 6 (Allocation) and Module 7 (Add-Ons) verification complete." + reset);
+        System.out.println(cyan + "Module 10 (Cancellation & Rollback) verification complete." + reset);
         System.out.println("Application terminating normally.");
+
+
     }
 }

@@ -1,5 +1,6 @@
 package com.hotel.app.demo;
 
+import com.hotel.app.exception.NoAvailabilityException;
 import com.hotel.app.model.*;
 import com.hotel.app.service.*;
 
@@ -38,9 +39,8 @@ public class UseCase6And7Confirmation {
             if (nextReq == null) break;
 
             System.out.println("Processing " + nextReq.getGuestName() + "...");
-            String assignedRoom = allocationService.allocateRoom(nextReq);
-
-            if (assignedRoom != null) {
+            try {
+                String assignedRoom = allocationService.allocateRoom(nextReq);
                 System.out.println("SUCCESS: " + nextReq.getGuestName() + " assigned to " + assignedRoom);
                 
                 // 4. Handle Add-ons (Use Case 7)
@@ -49,8 +49,8 @@ public class UseCase6And7Confirmation {
                     addOnManager.addService(assignedRoom, new AddOnService("Breakfast Buffet", 15.0));
                     addOnManager.displayServicesForRoom(assignedRoom);
                 }
-            } else {
-                System.out.println("FAILED: No availability for " + nextReq.getGuestName());
+            } catch (NoAvailabilityException e) {
+                System.out.println("FAILED: " + e.getMessage());
             }
         }
 

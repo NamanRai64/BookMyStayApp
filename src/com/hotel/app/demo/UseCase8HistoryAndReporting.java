@@ -1,5 +1,6 @@
 package com.hotel.app.demo;
 
+import com.hotel.app.exception.NoAvailabilityException;
 import com.hotel.app.model.*;
 import com.hotel.app.service.*;
 import java.util.HashMap;
@@ -50,9 +51,8 @@ public class UseCase8HistoryAndReporting {
             if (nextReq == null) break;
 
             System.out.print("Processing Guest: " + nextReq.getGuestName() + " | ");
-            String assignedRoom = allocationService.allocateRoom(nextReq);
-
-            if (assignedRoom != null) {
+            try {
+                String assignedRoom = allocationService.allocateRoom(nextReq);
                 System.out.println("SUCCESS. Assigned to " + assignedRoom);
                 
                 // --- Requirement: Store each confirmed reservation in booking history ---
@@ -73,9 +73,8 @@ public class UseCase8HistoryAndReporting {
                 
                 // --- Requirement: Confirmed reservation is added to history ---
                 history.addRecord(res);
-                
-            } else {
-                System.out.println("FAILED. No availability for '" + nextReq.getRoomType() + "' mode.");
+            } catch (NoAvailabilityException e) {
+                System.out.println("FAILED. " + e.getMessage());
             }
         }
 
