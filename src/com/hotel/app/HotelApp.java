@@ -50,6 +50,7 @@ public class HotelApp {
         BookingHistory bookingHistory = new BookingHistory(); // UC 8
         BookingReportService reportService = new BookingReportService(); // UC 8
         BookingValidator validator = new BookingValidator(inventory); // UC 9
+
         CancellationService cancellationService = new CancellationService(bookingHistory, inventory); // UC 10
         PersistenceService persistenceStorage = new PersistenceService("hotel_final_state.ser"); // UC 12
 
@@ -70,6 +71,7 @@ public class HotelApp {
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("RECOVERY FAILED (I/O Error): " + e.getMessage());
         }
+
 
         // --- Use Case 3 & 4: Room Discovery & Initialization ---
         System.out.println(cyan + "\n>> [PHASE 1] Initializing Room Inventory & Catalog..." + reset);
@@ -182,6 +184,7 @@ public class HotelApp {
         System.out.println(gold + border + reset);
         System.out.println(cyan + "Module 10 (Cancellation & Rollback) verification complete." + reset);
         System.out.println("Application terminating normally.");
+
 
 
     }
