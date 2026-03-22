@@ -1,5 +1,6 @@
 package com.hotel.app.service;
 
+import com.hotel.app.exception.NoAvailabilityException;
 import com.hotel.app.model.ReservationRequest;
 import java.util.*;
 
@@ -21,25 +22,22 @@ public class AllocationService {
     /**
      * Requirement: Generate and assign a unique room ID.
      * Prevents reuse across all allocations using Sets.
+     * Requirement: Throws and handle custom exceptions for invalid scenarios.
      */
-    public String allocateRoom(ReservationRequest request) {
+    public String allocateRoom(ReservationRequest request) throws NoAvailabilityException {
         String type = request.getRoomType();
         
-        // 1. Check availability
-        if (inventory.getAvailability(type) > 0) {
-            // 2. Decrement inventory immediately (Atomic Logical Operation)
-            inventory.updateAvailability(type, -1);
-            
-            // 3. Generate Unique Room ID
-            String roomId = type.substring(0, 1).toUpperCase() + (roomCounter++);
-            
-            // 4. Record to prevent reuse (Set Data Structure)
-            allocatedRooms.computeIfAbsent(type, k -> new HashSet<>()).add(roomId);
-            
-            return roomId;
-        }
+        // 1. Decrement inventory immediately (Atomic Logical Operation)
+        // Guarding System State: updateAvailability now throws NoAvailabilityException
+        inventory.updateAvailability(type, -1);
         
-        return null; // No availability
+        // 2. Generate Unique Room ID
+        String roomId = type.substring(0, 1).toUpperCase() + (roomCounter++);
+        
+        // 3. Record to prevent reuse (Set Data Structure)
+        allocatedRooms.computeIfAbsent(type, k -> new HashSet<>()).add(roomId);
+        
+        return roomId;
     }
 
     public void displayAllocations() {
