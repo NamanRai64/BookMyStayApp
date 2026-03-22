@@ -39,6 +39,23 @@ public class RoomInventory {
         inventory.put(roomType, newCount);
     }
 
+    /**
+     * Requirement: Persistent Snapshot of current availability.
+     */
+    public synchronized Map<String, Integer> getInventorySnapshot() {
+        return new HashMap<>(inventory);
+    }
+
+    /**
+     * Requirement: Restore persisted data during application startup.
+     */
+    public synchronized void restoreFromSnapshot(Map<String, Integer> snapshot) {
+        if (snapshot == null) return;
+        inventory.clear();
+        inventory.putAll(snapshot);
+        System.out.println(">> System: Room Inventory restored from persistence snapshot.");
+    }
+
     public void displayInventory() {
         System.out.println("\n--- Centralized Room Inventory Status ---");
         for (Map.Entry<String, Integer> entry : inventory.entrySet()) {

@@ -1,5 +1,6 @@
 package com.hotel.app.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,8 @@ import java.util.List;
  * Represents a confirmed booking stored in history.
  * Key Concept: Historical Tracking - Once stored, form an audit trail.
  */
-public class Reservation {
+public class Reservation implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String guestName;
     private final String roomType;
     private final String roomId;

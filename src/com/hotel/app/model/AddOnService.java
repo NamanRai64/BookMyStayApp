@@ -1,10 +1,12 @@
 package com.hotel.app.model;
 
+import java.io.Serializable;
+
 /**
  * Use Case 7: Add-On Service Selection
  * Represents an optional service a guest can add to their stay.
  */
-public class AddOnService {
+public class AddOnService implements Serializable {
     private String name;
     private double price;
 
