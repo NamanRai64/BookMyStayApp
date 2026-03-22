@@ -49,6 +49,8 @@ public class HotelApp {
         BookingHistory bookingHistory = new BookingHistory(); // UC 8
         BookingReportService reportService = new BookingReportService(); // UC 8
         BookingValidator validator = new BookingValidator(inventory); // UC 9
+        CancellationService cancellationService = new CancellationService(bookingHistory, inventory); // UC 10
+
 
 
 
@@ -131,9 +133,30 @@ public class HotelApp {
         System.out.println(gold + "\n>> [PHASE 5] Admin Historical Reports & Analytics:" + reset);
         reportService.generateSummaryReport(bookingHistory.getHistoricalRecords());
 
+        // --- Use Case 10: Booking Cancellation & State Rollback ---
+        System.out.println(gold + "\n>> [PHASE 6] Booking Cancellation & System Rollback:" + reset);
+        try {
+            // Simulating a guest (Alice) cancelling her booking (S101)
+            System.out.println(">> Guest (Alice) initiating cancellation [REQ TYPE: Rollback]...");
+            cancellationService.cancelBooking("S101");
+            
+            // Simulating an invalid cancellation attempt
+            System.out.println("\n>> Guest attempting an invalid cancellation (Unknown ID)...");
+            cancellationService.cancelBooking("X999");
+        } catch (HotelAppException e) {
+            System.err.println("CATCH: " + e.getMessage());
+        }
+
+        // --- Final System State Audit ---
+        System.out.println(gold + "\n>> [FINAL] System Audit & Rollback Verification:" + reset);
+        allocationService.displayAllocations();
+        inventory.displayInventory();
+        cancellationService.displayRollbackState();
+        
         System.out.println(gold + border + reset);
-        System.out.println(cyan + "Module 8 (History & Reporting) verification complete." + reset);
+        System.out.println(cyan + "Module 10 (Cancellation & Rollback) verification complete." + reset);
         System.out.println("Application terminating normally.");
+
 
     }
 }
