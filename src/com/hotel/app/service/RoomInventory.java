@@ -2,33 +2,34 @@ package com.hotel.app.service;
 
 import com.hotel.app.exception.NoAvailabilityException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class RoomInventory {
-    private Map<String, Integer> inventory;
+    private final Map<String, Integer> inventory;
 
     public RoomInventory() {
         this.inventory = new HashMap<>();
     }
 
-    public void registerRoomType(String roomType, int initialCount) {
+    public synchronized void registerRoomType(String roomType, int initialCount) {
         inventory.put(roomType, initialCount);
     }
 
-    public int getAvailability(String roomType) {
+    public synchronized int getAvailability(String roomType) {
         return inventory.getOrDefault(roomType, 0);
     }
 
-    public Set<String> getAllRoomTypes() {
-        return inventory.keySet();
+    public synchronized Set<String> getAllRoomTypes() {
+        return new HashSet<>(inventory.keySet());
     }
 
     /**
-     * Requirement: Prevent inventory from reaching invalid or negative values.
-     * Throws an exception if change would result in negative counts (Guarding System State).
+     * Requirement: Critical Section protects shared inventory state.
+     * Prevents interleaving operations that could lead to double allocation.
      */
-    public void updateAvailability(String roomType, int change) throws NoAvailabilityException {
+    public synchronized void updateAvailability(String roomType, int change) throws NoAvailabilityException {
         if (!inventory.containsKey(roomType)) return;
         int currentCount = inventory.get(roomType);
         int newCount = currentCount + change;
@@ -36,6 +37,23 @@ public class RoomInventory {
             throw new NoAvailabilityException(roomType);
         }
         inventory.put(roomType, newCount);
+    }
+
+    /**
+     * Requirement: Persistent Snapshot of current availability.
+     */
+    public synchronized Map<String, Integer> getInventorySnapshot() {
+        return new HashMap<>(inventory);
+    }
+
+    /**
+     * Requirement: Restore persisted data during application startup.
+     */
+    public synchronized void restoreFromSnapshot(Map<String, Integer> snapshot) {
+        if (snapshot == null) return;
+        inventory.clear();
+        inventory.putAll(snapshot);
+        System.out.println(">> System: Room Inventory restored from persistence snapshot.");
     }
 
     public void displayInventory() {

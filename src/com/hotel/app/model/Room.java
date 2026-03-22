@@ -1,10 +1,12 @@
 package com.hotel.app.model;
 
+import java.io.Serializable;
+
 /**
  * Key Concept: Abstract Class - Provides a template for specific room types.
  * Helps in enforcing a consistent structure for all rooms.
  */
-public abstract class Room {
+public abstract class Room implements Serializable {
     protected String roomType;
     protected int numberOfBeds;
     protected double size;

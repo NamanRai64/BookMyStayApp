@@ -3,6 +3,7 @@ package com.hotel.app;
 import com.hotel.app.exception.HotelAppException;
 import com.hotel.app.model.*;
 import com.hotel.app.service.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +51,26 @@ public class HotelApp {
         BookingReportService reportService = new BookingReportService(); // UC 8
         BookingValidator validator = new BookingValidator(inventory); // UC 9
 
+        CancellationService cancellationService = new CancellationService(bookingHistory, inventory); // UC 10
+        PersistenceService persistenceStorage = new PersistenceService("hotel_final_state.ser"); // UC 12
+
+
+
+
+
+
+        // --- Use Case 12: Recovery Phase (Phase 0) ---
+        System.out.println(gold + "\n>> [PHASE 0] System Startup: Recovering Previous State..." + reset);
+        try {
+            SystemState recoveredState = persistenceStorage.loadState();
+            if (recoveredState != null) {
+                bookingHistory.restoreHistoricalRecords(recoveredState.getHistory());
+                inventory.restoreFromSnapshot(recoveredState.getInventory());
+                System.out.println(cyan + "RESULT: System fully recovered from last known snapshot." + reset);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("RECOVERY FAILED (I/O Error): " + e.getMessage());
+        }
 
 
         // --- Use Case 3 & 4: Room Discovery & Initialization ---
@@ -131,9 +152,40 @@ public class HotelApp {
         System.out.println(gold + "\n>> [PHASE 5] Admin Historical Reports & Analytics:" + reset);
         reportService.generateSummaryReport(bookingHistory.getHistoricalRecords());
 
+        // --- Use Case 10: Booking Cancellation & State Rollback ---
+        System.out.println(gold + "\n>> [PHASE 6] Booking Cancellation & System Rollback:" + reset);
+        try {
+            // Simulating a guest (Alice) cancelling her booking (S101)
+            System.out.println(">> Guest (Alice) initiating cancellation [REQ TYPE: Rollback]...");
+            cancellationService.cancelBooking("S101");
+            
+            // Simulating an invalid cancellation attempt
+            System.out.println("\n>> Guest attempting an invalid cancellation (Unknown ID)...");
+            cancellationService.cancelBooking("X999");
+        } catch (HotelAppException e) {
+            System.err.println("CATCH: " + e.getMessage());
+        }
+
+        // --- Final System State Audit ---
+        System.out.println(gold + "\n>> [FINAL] System Audit & Rollback Verification:" + reset);
+        allocationService.displayAllocations();
+        inventory.displayInventory();
+        cancellationService.displayRollbackState();
+        
+        // --- Use Case 12: Persistence Phase (Phase 7) ---
+        System.out.println(gold + "\n>> [PHASE 7] Final System State Snapshot & Persistence..." + reset);
+        try {
+            SystemState finalSnap = new SystemState(bookingHistory.getHistoricalRecords(), inventory.getInventorySnapshot());
+            persistenceStorage.saveState(finalSnap);
+        } catch (IOException e) {
+            System.err.println("PERSISTENCE FAILED (I/O Error): " + e.getMessage());
+        }
+
         System.out.println(gold + border + reset);
-        System.out.println(cyan + "Module 8 (History & Reporting) verification complete." + reset);
+        System.out.println(cyan + "Module 10 (Cancellation & Rollback) verification complete." + reset);
         System.out.println("Application terminating normally.");
+
+
 
     }
 }

@@ -21,20 +21,30 @@ public class BookingHistory {
     /**
      * Requirement: Confirmed reservation is added to booking history.
      */
-    public void addRecord(Reservation reservation) {
+    public synchronized void addRecord(Reservation reservation) {
         history.add(reservation);
         System.out.println(">> System: History Entry Recorded for " + reservation.getGuestName());
+    }
+
+    /**
+     * Requirement: Restore persisted data during application startup.
+     */
+    public synchronized void restoreHistoricalRecords(List<Reservation> records) {
+        if (records == null) return;
+        history.clear();
+        history.addAll(records);
+        System.out.println(">> System: Booking History restored from persistence snapshot.");
     }
 
     /**
      * Requirement: Allow retrieval of stored reservations for review.
      * Returns a copy to follow "Reporting Readiness" principle (Separation of Data and Logic).
      */
-    public List<Reservation> getHistoricalRecords() {
+    public synchronized List<Reservation> getHistoricalRecords() {
         return new ArrayList<>(history);
     }
 
-    public int getRecordCount() {
+    public synchronized int getRecordCount() {
         return history.size();
     }
 }
