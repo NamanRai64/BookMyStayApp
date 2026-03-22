@@ -1,5 +1,6 @@
 package com.hotel.app.service;
 
+import com.hotel.app.exception.NoAvailabilityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,13 +24,18 @@ public class RoomInventory {
         return inventory.keySet();
     }
 
-    public boolean updateAvailability(String roomType, int change) {
-        if (!inventory.containsKey(roomType)) return false;
+    /**
+     * Requirement: Prevent inventory from reaching invalid or negative values.
+     * Throws an exception if change would result in negative counts (Guarding System State).
+     */
+    public void updateAvailability(String roomType, int change) throws NoAvailabilityException {
+        if (!inventory.containsKey(roomType)) return;
         int currentCount = inventory.get(roomType);
         int newCount = currentCount + change;
-        if (newCount < 0) return false;
+        if (newCount < 0) {
+            throw new NoAvailabilityException(roomType);
+        }
         inventory.put(roomType, newCount);
-        return true;
     }
 
     public void displayInventory() {
